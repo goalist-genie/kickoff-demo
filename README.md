@@ -3,6 +3,6 @@
 ```bash
 $ poetry install
 
-$ poetry run uvicorn src.main:app --reload --log-config=log-config.yaml
+$ poetry run python src/main.py
 
 ```
