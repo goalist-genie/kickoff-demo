@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from fastapi import UploadFile
 from typing import Any
 from uuid import uuid4
@@ -17,6 +17,13 @@ class DataResponse(BaseModel):
         },
         "arbitrary_types_allowed": True,
     }
+
+
+class User(BaseModel):
+    id: str = Field(default_factory=lambda: uuid4().hex)
+    full_name: str
+    email: EmailStr
+    password: str
 
 
 class Document(BaseModel):
