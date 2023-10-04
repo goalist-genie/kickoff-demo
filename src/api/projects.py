@@ -1,7 +1,8 @@
-from fastapi import APIRouter, status, UploadFile
+from fastapi import APIRouter, status, UploadFile, Form, File
 from fastapi.requests import Request
 from config import settings
-from dto.objects import Project, Document
+from dto.objects import Project, Document, User
+from dto.requests import ProjectUpsertDto
 from utils import create_200_response, exclude
 from dto.objects import DataResponse
 from exceptions import NotFoundException
@@ -46,15 +47,37 @@ async def get_projects(search: str = None) -> DataResponse:
 
 
 @project_router.post(
-    "/projects", response_model=DataResponse, response_model_exclude_none=True
+    "/projects",
+    response_model=DataResponse,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_201_CREATED,
 )
-async def create_project(dto: Project) -> DataResponse:
+async def create_project(
+    request: Request,
+    project_name: str = Form(),
+    project_overview: str = Form(),
+    files: list[UploadFile] = File(),
+) -> DataResponse:
     id = generate_id()
+    current_user: User = request.state.user
     new_project = Project(
-        id=id, project_name=dto.project_name, created_by=dto.created_by
+        id=id,
+        project_name=project_name,
+        project_overview=project_overview,
+        created_by=current_user.full_name,
     )
+
+    if files:
+        for file in files:
+            document = Document(
+                document_name=file.filename,
+                created_by=current_user.full_name,
+                file=file,
+            )
+            new_project.documents.append(document)
+
     projects_store.append(new_project)
-    return DataResponse(status=status.HTTP_200_OK, message="create successfully")
+    return DataResponse(status=status.HTTP_201_CREATED, message="create successfully")
 
 
 @project_router.get(

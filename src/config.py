@@ -35,6 +35,7 @@ class Settings(BaseSettings):
         "/openapi.json",
         API_V1_STR + "/login",
         API_V1_STR + "/register",
+        # API_V1_STR + "/projects",
     ]
 
 

@@ -24,11 +24,11 @@ async def authenticate_middleware(request: Request, call_next):
         authentication = authentication.split(" ")
         if len(authentication) != 2 or authentication[0] != "Bearer":
             raise Exception("Invalid token")
+        
+        token = authentication[1]
+        current_user = verify_token(token)
+        request.state.user = current_user
+        return await call_next(request)
     except:
         content = DataResponse(status=401, message="Unauthorized").model_dump(exclude=["data"])
         return JSONResponse(status_code=401, content=content)
-    
-    token = authentication[1]
-    current_user = verify_token(token)
-    request.state.user = current_user
-    return await call_next(request)
